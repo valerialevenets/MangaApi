@@ -1,0 +1,75 @@
+version: '3.4'
+
+services:
+    cron:
+        container_name: manga-cron
+        depends_on:
+            - "db"
+            - "btd"
+            - "redis"
+        build:
+            context: ./..
+            dockerfile: dev/cron.dockerfile
+        restart: unless-stopped
+        volumes:
+            - ./..:/var/www/html
+            - ./data/storage:/var/www/html/storage
+            - ./data/composer:/root/.composer
+    btd:
+        container_name: manga-btd
+        image: schickling/beanstalkd
+        ports:
+            - "11300:1130"
+#    worker:
+#        depends_on:
+#            - "db"
+#            - "btd"
+#            - "redis"
+#        restart: unless-stopped
+#        build:
+#            context: ./..
+#            dockerfile: dev/worker.dockerfile
+#        volumes:
+#            - ./..:/var/www/html
+#            - ./data/storage:/var/www/html/storage
+#            - ./data/composer:/root/.composer
+
+    backend:
+        container_name: manga-api
+        depends_on:
+            - "db"
+            - "btd"
+            - "redis"
+        build:
+            context: ./..
+            dockerfile: dev/Dockerfile
+        restart: unless-stopped
+        ports:
+            - "9999:80"
+        volumes:
+            - ./..:/var/www/html
+            - ./data/storage:/var/www/html/storage
+            - ./data/composer:/root/.composer
+
+    db:
+        container_name: manga-db
+        image: mysql:8.0.40-debian
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+            - ./data/mysql:/home/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=password
+            - MYSQL_DATABASE=panga
+            - MYSQL_USER=manga
+            - MYSQL_PASSWORD=password
+        ports:
+            -   "8806:3306"
+    redis:
+        container_name: manga-redis
+        image: redis:latest
+        environment:
+            - REDIS_PASSWORD=password29
+            - REDIS_DATABASE=16
+            - REDIS_PORT=6379
+        ports:
+            - "6379:6379"
