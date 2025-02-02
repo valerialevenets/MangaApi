@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ExternalApi\Kitsu;
+namespace App\MangaResources\Metadata\Kitsu;
 use Illuminate\Cache\RedisStore;
 use Illuminate\Cache\RedisTaggedCache;
 use Illuminate\Support\Facades\Cache;
@@ -14,25 +14,29 @@ class Kitsu
     }
     public function init()
     {
-        $this->initializeCategories();
-        $this->initializeGenres();
-        $this->initializeMappings();
+//        $this->initializeCategories();
+//        $this->initializeGenres();
+//        $this->initializeMappings();
+        $this->initializeManga();
     }
     public function getMangaById(int $id): array
     {
-        return $this->convertManga($this->api->getMangaById($id)->json('data'));
+//        return $this->convertManga($this->api->getMangaById($id)->json('data'));
         if ($this->getCache()->has('manga:' . $id)) {
-            //return from cache
+            return $this->getCache()->get('manga:' . $id);
         } else {
+            return [];
             //get from api, save to cache and return
         }
     }
     private function convertManga(array $manga): array
     {
-        dd($manga);
+        //TODO relations to authors. Right now its in development (on Kitsu side)
         $out = [
             'id' => $manga['id'],
             'titles' => $manga['attributes']['titles'],
+            'abbreviatedTitles' => $manga['attributes']['abbreviatedTitles'],
+            'slug' => $manga['attributes']['slug'],
             'createdAt' => $manga['attributes']['createdAt'],
             'updatedAt' => $manga['attributes']['updatedAt'],
             'canonicalTitle' => $manga['attributes']['canonicalTitle'],
@@ -91,6 +95,21 @@ class Kitsu
     private function getCache(): RedisTaggedCache
     {
         return $this->redis->tags('kitsu:');
+    }
+    private function initializeManga()
+    {
+        $limit = 20;
+        $offset = 0;
+        do {
+            $response = $this->api->getManga($offset, $limit);
+            foreach ($response->json('data') as $item) {
+                $this->getCache()->put(
+                    'manga:'.$item['id'],
+                    $this->convertManga($item)
+                );
+            }
+            $offset += $limit;
+        } while (!empty($response->json('data')));
     }
     private function initializeCategories()
     {

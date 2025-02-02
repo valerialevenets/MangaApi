@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ExternalApi\Kitsu\Exception;
+namespace App\MangaResources\Metadata\Kitsu\Exception;
 
 class LimitSizeException extends \Exception
 {

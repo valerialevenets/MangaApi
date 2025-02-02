@@ -2,29 +2,25 @@
 
 namespace App\Console\Commands;
 
+use App\MangaResources\Metadata\Kitsu\Api;
+use App\MangaResources\Metadata\Kitsu\Kitsu;
 use Illuminate\Console\Command;
 
-class manga:test extends Command
+class MangaTest extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:manga:test';
+    public function __construct(private readonly Kitsu $kitsu, private readonly Api $api)
+    {
+        parent::__construct();
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Command description';
 
-    /**
-     * Execute the console command.
-     */
+    }
+
+    protected $signature = 'manga:test';
+    protected $description = 'just command for test';
+
     public function handle()
     {
-        //
+        $this->kitsu->init();
+        dd($this->kitsu->getMangaById(13612));
     }
 }

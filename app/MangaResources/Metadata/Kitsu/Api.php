@@ -1,8 +1,8 @@
 <?php
 
-namespace App\ExternalApi\Kitsu;
+namespace App\MangaResources\Metadata\Kitsu;
 
-use App\ExternalApi\Kitsu\Exception\LimitSizeException;
+use App\MangaResources\Metadata\Kitsu\Exception\LimitSizeException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\Response;
 class Api
